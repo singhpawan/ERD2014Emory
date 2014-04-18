@@ -82,4 +82,12 @@ public class AnnotationSet implements Iterable<Annotation> {
             throw new IllegalArgumentException("ArgumentSet confidence score should be between 0 and 1.");
         score = newScore;
     }
+
+    /**
+     * Returns the number of annotations in the set.
+     * @return Integer representing the number of annotations in the set.
+     */
+    public int getAnnotationsCount() {
+        return this.annotations.size();
+    }
 }

@@ -5,7 +5,7 @@ import opennlp.tools.util.Span;
 /**
  * Represents entity annotation.
  */
-final public class Annotation {
+final public class Annotation implements Comparable<Annotation> {
     // Text of the whole document that is being annotated
     private final Text sourceText;
     // Annotated span
@@ -61,4 +61,13 @@ final public class Annotation {
         return this.score;
     }
 
+    /**
+     * Annotations are compared by their span.
+     * @param annotation Annotation to compare to.
+     * @return result of comparison (negative, 0 or positive).
+     */
+    @Override
+    public int compareTo(Annotation annotation) {
+        return span.compareTo(annotation.span);
+    }
 }

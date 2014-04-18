@@ -91,7 +91,7 @@ public class LexiconMentionBuilder implements MentionBuilder {
                 if (lexicon.containsKey(phrase)) {
                     for (String entityId : lexicon.get(phrase)) {
                         res.add(new Annotation(document, currentSpan, new EntityInfo(entityId, entityId),
-                                getMentionScore(phrase, entityId)));
+                                getMentionScore(entityId, phrase)));
                     }
                    ++currentSpanEndWord;
                 } else if (lexicon.prefixMap(phrase).size() == 0) {

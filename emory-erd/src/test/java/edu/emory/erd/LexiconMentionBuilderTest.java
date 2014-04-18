@@ -1,9 +1,12 @@
-package edu.emory.erd.types;
+package edu.emory.erd;
 
 import edu.emory.erd.BasicDisambiguator;
 import edu.emory.erd.Disambiguator;
 import edu.emory.erd.LexiconMentionBuilder;
 import edu.emory.erd.MentionBuilder;
+import edu.emory.erd.types.Annotation;
+import edu.emory.erd.types.AnnotationSet;
+import edu.emory.erd.types.Text;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -15,7 +15,8 @@ public class LexiconBuilderRdf {
     public static void processFreebaseDump(String fileName) throws IOException {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new GZIPInputStream(new FileInputStream(fileName))));
-        while (reader.ready()) {
+        String line;
+        while ((line = reader.readLine()) != null) {
             String[] triple = reader.readLine().split("\t");
             String objectMid = stripRdf(triple[0]);
             String subjectMid = stripRdf(triple[2]);

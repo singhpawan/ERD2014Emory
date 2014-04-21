@@ -47,8 +47,9 @@ public class LexiconBuilderStandalone {
         BufferedReader tgzReader = new BufferedReader(new InputStreamReader(tarInput));
         while((currentEntry = tarInput.getNextTarEntry()) != null) {
             if (currentEntry.isFile()) {
-                while (tgzReader.ready()) {
-                    processLine(tgzReader.readLine());
+                String line;
+                while ((line = tgzReader.readLine()) != null) {
+                    processLine(line);
                 }
             }
         }

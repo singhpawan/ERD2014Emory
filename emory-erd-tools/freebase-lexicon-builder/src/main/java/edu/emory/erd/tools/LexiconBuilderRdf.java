@@ -25,14 +25,10 @@ public class LexiconBuilderRdf {
                     // Take wikipedia title substring (14 is the beginning of title)
                     System.out.println(objectMid + "\t" + "wiki\t" + subjectMid.substring(14));
                 } else if (predicate.equals("/type/object/name") && subjectMid.endsWith("en")) {
-                    String name = subjectMid;
-                    if (subjectMid.contains("\"@"))
-                        name = subjectMid.substring(1, subjectMid.indexOf("\"@"));
+                    String name = subjectMid.substring(1, subjectMid.lastIndexOf("\"@"));
                     System.out.println(objectMid + "\t" + "name\t" + name);
                 } else if (predicate.equals("/common/topic/alias") && subjectMid.endsWith("en")) {
-                    String name = subjectMid;
-                    if (subjectMid.contains("\"@"))
-                        name = subjectMid.substring(1, subjectMid.indexOf("\"@"));
+                    String name = subjectMid.substring(1, subjectMid.lastIndexOf("\"@"));
                     System.out.println(objectMid + "\t" + "alias\t" + name);
                 }
             }

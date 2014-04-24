@@ -30,12 +30,7 @@ class WikiLink {
  */
 public class WikipediaProcessor {
 
-    // All links found on wiki pages.
-    private static List<WikiLink> wikiLinks = new ArrayList<WikiLink>();
-
     public static void ProcessWikipediaDump(String filename) {
-
-
         try {
             WikiXMLParser parser = WikiXMLParserFactory.getSAXParser(filename);
             parser.setPageCallback(new PageCallbackHandler() {
@@ -46,14 +41,11 @@ public class WikipediaProcessor {
                     Vector<String> linkedPages = links.get("pageLinks");
                     Vector<String> linkTexts = links.get("pageLinkTexts");
                     for (int i = 0; i < linkedPages.size(); ++i) {
-                        wikiLinks.add(new WikiLink(title, linkedPages.get(i), linkTexts.get(i)));
+                        System.out.print(new WikiLink(title, linkedPages.get(i), linkTexts.get(i)));
                     }
                 }
             });
             parser.parse();
-            for (WikiLink link : wikiLinks) {
-                System.out.println(link);
-            }
         } catch (Exception exc) {
             System.err.println(exc.getMessage());
         }

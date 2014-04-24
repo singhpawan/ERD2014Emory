@@ -16,11 +16,37 @@
     </dependency>
 
     <dependency>
-      <groupId>wikixmlj</groupId>
-      <artifactId>edu.jhu.nlp.wikipedia</artifactId>
-      <scope>system</scope>
+      <groupId>edu.jhu.nlp.wikipedia</groupId>
+      <artifactId>wikixmlj</artifactId>
       <version>r-45</version>
-      <systemPath>${basedir}\src\lib\wikixmlj-r-45.jar</systemPath>
     </dependency>
   </dependencies>
+
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>2.5.1</version>
+              <inherited>true</inherited>
+              <configuration>
+                  <source>${jdk.version}</source>
+                  <target>${jdk.version}</target>
+              </configuration>
+          </plugin>
+          <plugin>
+              <!-- Build an executable JAR -->
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jar-plugin</artifactId>
+              <configuration>
+                  <archive>
+                      <manifest>
+                          <addClasspath>true</addClasspath>
+                          <mainClass>edu.emory.erd.tools.WikipediaProcessor</mainClass>
+                      </manifest>
+                  </archive>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
 </project>

@@ -8,9 +8,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class NlpUtilsTest {
 
@@ -72,4 +75,12 @@ public class NlpUtilsTest {
         assertEquals(41, annotations.get(1).getSpan().getEnd());
     }
 
+    @Test
+    public void testLanguageModel() {
+        List<String> words1 = Arrays.asList("New", "York", "is", "the", "largest");
+        List<String> words2 = Arrays.asList("New", "York", "is", "the", "largest", "city", "in", "USA");
+        double res1 = NlpUtils.getLanguageModelLogProbability(words1);
+        double res2 = NlpUtils.getLanguageModelLogProbability(words2);
+        assertTrue(res1 > res2);
+    }
 }

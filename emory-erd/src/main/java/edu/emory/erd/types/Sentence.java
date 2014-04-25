@@ -74,6 +74,18 @@ final public class Sentence implements Iterable<Word> {
     }
 
     /**
+     * Returns all words as strings.
+     * @return An array of strings, where each string is a word.
+     */
+    public String[] getWordsAsString() {
+        String[] words = new String[this.words.length];
+        for (int i = 0; i < this.words.length; ++i) {
+            words[i] = this.words[i].toString();
+        }
+        return words;
+    }
+
+    /**
      * @return Returns the number of words in the sentence.
      */
     public int getWordsCount() {

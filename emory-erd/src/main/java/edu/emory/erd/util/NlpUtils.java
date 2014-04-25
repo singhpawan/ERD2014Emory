@@ -1,15 +1,18 @@
 package edu.emory.erd.util;
 
+import edu.berkeley.nlp.lm.NgramLanguageModel;
+import edu.berkeley.nlp.lm.io.LmReaders;
 import edu.emory.erd.types.Annotation;
 import edu.emory.erd.types.EntityInfo;
 import edu.emory.erd.types.Sentence;
 import edu.emory.erd.types.Text;
 
+import edu.emory.erd.webservice.Main;
 import edu.stanford.nlp.ie.crf.*;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Word;
+import edu.berkeley.nlp.lm.StupidBackoffLm;
 import opennlp.tools.sentdetect.SentenceDetector;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
@@ -17,6 +20,8 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.Span;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +37,7 @@ public class NlpUtils {
     private static SentenceDetector sentenceDetector;
     private static Tokenizer tokenizer;
     private static AbstractSequenceClassifier nerTagger;
+    private static NgramLanguageModel<String> lm;
 
     static {
         // Create sentence detector from OpenNLP
@@ -122,5 +128,20 @@ public class NlpUtils {
             }
         }
         return annotations;
+    }
+
+    public static double getLanguageModelLogProbability(List<String> text) {
+        if (lm == null) {
+            PropertiesConfiguration config = null;
+            try {
+                config = new PropertiesConfiguration("emory-erd.properties");
+                lm = LmReaders.readLmBinary(config.getString("nGramBinaryModelFile"));
+            } catch (ConfigurationException e) {
+                lm = null;
+            }
+        }
+        assert lm != null;
+
+        return lm.getLogProb(text);
     }
 }

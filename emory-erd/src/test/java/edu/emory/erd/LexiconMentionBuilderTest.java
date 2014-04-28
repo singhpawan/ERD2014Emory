@@ -48,4 +48,5 @@ public class LexiconMentionBuilderTest {
         assertEquals(1, annotationSets.size());
         assertEquals(3, annotationSets.get(0).getAnnotationsCount());
     }
+
 }

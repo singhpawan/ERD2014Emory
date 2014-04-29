@@ -39,8 +39,8 @@ public class BasicDisambiguator implements Disambiguator {
         if (mem.get(currentPos).containsKey(currentBoundary)) return mem.get(currentPos).get(currentBoundary);
 
         // If we can include this mention.
-        double scoreKeep = 0.0;
-        double scoreRemove = 0.0;
+        double scoreKeep = Double.MIN_VALUE;
+        double scoreRemove = Double.MIN_VALUE;
         if (mentions.get(currentPos).getSpan().getStart() > currentBoundary) {
             scoreKeep = removeIntersecting(mentions, currentPos + 1, mentions.get(currentPos).getSpan().getEnd(),
                     res, mem, path) + mentions.get(currentPos).getScore();

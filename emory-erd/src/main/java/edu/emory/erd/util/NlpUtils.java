@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class uses OpenNLP to split text into sentences.
@@ -130,6 +132,22 @@ public class NlpUtils {
         return annotations;
     }
 
+    /**
+     * Calculates n-gram language model probability of the given phrase (based on Google N-Gram Web 1T). Text is given
+     * as a string. It is tokenized and double getLanguageModelLogProbability(List<String> text) is called.
+     * @param phrase Text to calculate language model probability for.
+     * @return double value equal to the log probability of the phrase according to the ngram model.
+     */
+    public static double getLanguageModelLogProbability(String phrase) {
+        return 1.0;
+        // return getLanguageModelLogProbability(Arrays.asList(NlpUtils.tokenize(phrase)));
+    }
+
+    /**
+     * Calculates n-gram language model probability of the given phrase (based on Google N-Gram Web 1T).
+     * @param text Text to calculate language model probability for.
+     * @return double value equal to the log probability of the phrase according to the ngram model.
+     */
     public static double getLanguageModelLogProbability(List<String> text) {
         if (lm == null) {
             PropertiesConfiguration config = null;
@@ -143,5 +161,19 @@ public class NlpUtils {
         assert lm != null;
 
         return lm.getLogProb(text);
+    }
+
+    /**
+     * In Freebase unicode characters are encoded using $XXXX encoding, where XXXX is the code of a character
+     * @param name The original name, as stored in Freebase.
+     * @return A String with name with unicode chars unquoted.
+     */
+    public static String unquoteFreebaseName(String name) {
+        if (name.indexOf('$') == -1) return name;
+        Matcher m = Pattern.compile("\\$([0-9A-Fa-f]{4})").matcher(name);
+        while (m.find()) {
+            name = name.replace(m.group(), Character.toString((char)Integer.parseInt(m.group(1), 16)));
+        }
+        return name;
     }
 }

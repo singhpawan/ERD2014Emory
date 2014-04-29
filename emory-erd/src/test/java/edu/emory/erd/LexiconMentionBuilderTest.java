@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +29,7 @@ public class LexiconMentionBuilderTest {
         mentionBuilder = new LexiconMentionBuilder(
                 LexiconMentionBuilderTest.class.getResourceAsStream("/entity_lexicon.txt"));
         annotations = mentionBuilder.buildMentions(new Text("I saw Mark Byford, David Clarke in the Possum town"));
-        disambiguator = new BasicDisambiguator();
+        disambiguator = new CoocuranceDisambiguator();
     }
 
     @After
@@ -39,6 +40,7 @@ public class LexiconMentionBuilderTest {
     public void testMentionBuilder() {
         // Mark, Mark Byford, Byford, Possum town
         assertEquals(7, annotations.size());
+        System.out.println(Arrays.toString(annotations.toArray()));
         assertEquals("/m/02qgwd", annotations.get(0).getEntityInfo().getId());
     }
 
@@ -48,4 +50,5 @@ public class LexiconMentionBuilderTest {
         assertEquals(1, annotationSets.size());
         assertEquals(3, annotationSets.get(0).getAnnotationsCount());
     }
+
 }

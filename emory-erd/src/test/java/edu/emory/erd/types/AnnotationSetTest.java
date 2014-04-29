@@ -28,10 +28,6 @@ public class AnnotationSetTest {
         annotationSet.setScore(0.75);
         // Check if the score is stored
         assertEquals(0.75, annotationSet.getScore(), 0.0);
-        try {
-            annotationSet.setScore(2.0);
-            fail("setScore should raise exception if value if out of range");
-        } catch (IllegalArgumentException exc) {}
     }
 
     @Test

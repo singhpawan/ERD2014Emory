@@ -78,8 +78,6 @@ public class AnnotationSet implements Iterable<Annotation> {
      * @throws IllegalArgumentException if new score is less than 0 or greater than 1.
      */
     public void setScore(double newScore) throws IllegalArgumentException {
-        if (newScore < 0 || newScore > 1)
-            throw new IllegalArgumentException("ArgumentSet confidence score should be between 0 and 1.");
         score = newScore;
     }
 
@@ -89,5 +87,15 @@ public class AnnotationSet implements Iterable<Annotation> {
      */
     public int getAnnotationsCount() {
         return this.annotations.size();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder res = new StringBuilder();
+        for (Annotation annotation : annotations) {
+            res.append(annotation);
+            res.append("\n");
+        }
+        return res.toString();
     }
 }

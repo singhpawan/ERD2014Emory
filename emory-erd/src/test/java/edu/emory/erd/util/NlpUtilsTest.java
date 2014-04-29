@@ -76,11 +76,28 @@ public class NlpUtilsTest {
     }
 
     @Test
-    public void testLanguageModel() {
+    public void testLanguageModelLong() {
         List<String> words1 = Arrays.asList("New", "York", "is", "the", "largest");
         List<String> words2 = Arrays.asList("New", "York", "is", "the", "largest", "city", "in", "USA");
         double res1 = NlpUtils.getLanguageModelLogProbability(words1);
         double res2 = NlpUtils.getLanguageModelLogProbability(words2);
         assertTrue(res1 > res2);
+    }
+
+    @Test
+    public void testLanguageModelFrequency() {
+        List<String> words1 = Arrays.asList("New", "New");
+        List<String> words2 = Arrays.asList("New", "York");
+        double res1 = NlpUtils.getLanguageModelLogProbability(words1);
+        double res2 = NlpUtils.getLanguageModelLogProbability(words2);
+        assertTrue(res1 < res2);
+    }
+
+    @Test
+    public void testUnquoteFreebaseName() {
+        assertEquals("National_Institute_of_Education_(Cambodia)",
+                NlpUtils.unquoteFreebaseName("National_Institute_of_Education_$0028Cambodia$0029"));
+        assertEquals("Tommy_Ward_(footballer,_born_1917)",
+                NlpUtils.unquoteFreebaseName("Tommy_Ward_$0028footballer$002C_born_1917$0029"));
     }
 }

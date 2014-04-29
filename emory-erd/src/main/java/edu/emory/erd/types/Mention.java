@@ -16,8 +16,6 @@ public class Mention {
      * @param score Confidence score, could be p(phrase|entity) or p(entity|phrase).
      */
     public Mention(String phrase, EntityInfo entity, double score) {
-        if (score < 0 || score > 1)
-            throw new IllegalArgumentException("Mention confidence score should be between 0 and 1");
         this.entity = entity;
         this.phrase = phrase;
         this.score = score;

@@ -1,6 +1,9 @@
 package edu.emory.erd;
 
 import edu.emory.erd.types.*;
+import edu.emory.erd.util.NlpUtils;
+import edu.emory.erd.util.WikipediaLinks;
+import javassist.compiler.Lex;
 import opennlp.tools.util.Span;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.HashedMap;
@@ -10,7 +13,10 @@ import org.apache.commons.collections4.trie.PatriciaTrie;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Finds entity mentions using sliding window and lexicon.
@@ -21,6 +27,13 @@ public class LexiconMentionBuilder implements MentionBuilder {
     private HashMap<String, Long> entityCount;  // the number of mentions for each entity.
     private long totalCount; // total number of mentions.
 
+    // a map from wikipedia entity name to Freebase mid.
+    private HashMap<String, String> wiki2mid = new HashMap<String, String>();
+
+    public LexiconMentionBuilder() throws IOException {
+        this(new FileInputStream(ErdConfig.getConfig().getString("entityLexiconFile")));
+    }
+
     public LexiconMentionBuilder(InputStream lexiconStream) throws IOException {
         // Initialize fields.
         lexicon = new PatriciaTrie<List<String>>();
@@ -28,6 +41,7 @@ public class LexiconMentionBuilder implements MentionBuilder {
         entityCount = new HashMap<String, Long>();
         totalCount = 0;
 
+        System.out.println("Reading lexicon...");
         BufferedReader lexiconReader = new BufferedReader(new InputStreamReader(lexiconStream));
         while (lexiconReader.ready()) {
             String[] line = lexiconReader.readLine().split("\t");
@@ -36,9 +50,42 @@ public class LexiconMentionBuilder implements MentionBuilder {
                 String phrase = line[i-1];
                 Long count = Long.parseLong(line[i]);
                 addCounts(entityId, phrase, count);
-                if (!lexicon.containsKey(phrase))
-                    lexicon.put(phrase, new ArrayList<String>());
-                lexicon.get(phrase).add(entityId);
+                addLexiconEntry(phrase, entityId);
+            }
+        }
+        System.out.println("Reading wikipedia links...");
+        addWikipediaLinks();
+        System.out.println("Reading Freebase entity names...");
+        readFreebaseEntityNames();
+    }
+
+    private void addWikipediaLinks() throws IOException {
+        WikipediaLinks links = WikipediaLinks.getWikipediaLinks();
+        for (WikipediaLinks.Link link : links) {
+            if (!wiki2mid.containsKey(link.to)) {
+                System.err.println("Missing wiki title: " + link.to);
+                continue;
+            }
+            addLexiconEntry(link.phrase, wiki2mid.get(link.to));
+        }
+    }
+
+    /**
+     * Reads Freebase entity names extracted by LexiconBuilderRdf tool from emory-erd-tools.
+     * @throws IOException
+     */
+    private void readFreebaseEntityNames() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(ErdConfig.getConfig().getString("freebaseNamesFile"))));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] fields = line.split("\t");
+            if (fields[1].equals("name") || fields[1].equals("alias")) {
+                addLexiconEntry(fields[2], fields[0]);
+                addCounts(fields[0], fields[2], 1L);
+            } else { // Also read wikipedia links
+                wiki2mid.put(WikipediaLinks.normalizeTitle(fields[2]), fields[0]);
+                WikipediaLinks.getWikipediaLinks().addMid2Wiki(fields[0], fields[2]);
             }
         }
     }
@@ -62,6 +109,17 @@ public class LexiconMentionBuilder implements MentionBuilder {
     }
 
     /**
+     * Adds entityId with the given phrase to the lexicon.
+     * @param phrase A phrase used to refer to the entity.
+     * @param entityId The referred entity.
+     */
+    private void addLexiconEntry(String phrase, String entityId) {
+        if (!lexicon.containsKey(phrase))
+            lexicon.put(phrase, new ArrayList<String>());
+        lexicon.get(phrase).add(entityId);
+    }
+
+    /**
      * Returns confidence score for entity mention.
      * @param entityId mentioned entity.
      * @param phrase mention phrase.
@@ -71,7 +129,9 @@ public class LexiconMentionBuilder implements MentionBuilder {
         if (!entityPhraseCount.containsKey(entityId, phrase))
             // TODO: Use smoothing.
             return 0.0;
-        return 1.0 * entityPhraseCount.get(entityId, phrase) / totalCount;
+        return Math.log(1.0 * entityPhraseCount.get(entityId, phrase) / entityCount.get(entityId)) +
+                Math.log(1.0 * (entityCount.get(entityId) + 1.0) / (totalCount + entityCount.size() + 1)) -
+                NlpUtils.getLanguageModelLogProbability(phrase);
     }
 
     @Override

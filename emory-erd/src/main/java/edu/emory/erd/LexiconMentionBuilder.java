@@ -85,6 +85,7 @@ public class LexiconMentionBuilder implements MentionBuilder {
                 addCounts(fields[0], fields[2], 1L);
             } else { // Also read wikipedia links
                 wiki2mid.put(WikipediaLinks.normalizeTitle(fields[2]), fields[0]);
+                WikipediaLinks.getWikipediaLinks().addMid2Wiki(fields[0], fields[2]);
             }
         }
     }
@@ -128,7 +129,9 @@ public class LexiconMentionBuilder implements MentionBuilder {
         if (!entityPhraseCount.containsKey(entityId, phrase))
             // TODO: Use smoothing.
             return 0.0;
-        return 1.0 * entityPhraseCount.get(entityId, phrase) / totalCount;
+        return Math.log(1.0 * entityPhraseCount.get(entityId, phrase) / entityCount.get(entityId)) +
+                Math.log(1.0 * (entityCount.get(entityId) + 1.0) / (totalCount + entityCount.size() + 1)) -
+                NlpUtils.getLanguageModelLogProbability(phrase);
     }
 
     @Override

@@ -133,6 +133,17 @@ public class NlpUtils {
     }
 
     /**
+     * Calculates n-gram language model probability of the given phrase (based on Google N-Gram Web 1T). Text is given
+     * as a string. It is tokenized and double getLanguageModelLogProbability(List<String> text) is called.
+     * @param phrase Text to calculate language model probability for.
+     * @return double value equal to the log probability of the phrase according to the ngram model.
+     */
+    public static double getLanguageModelLogProbability(String phrase) {
+        return 1.0;
+        // return getLanguageModelLogProbability(Arrays.asList(NlpUtils.tokenize(phrase)));
+    }
+
+    /**
      * Calculates n-gram language model probability of the given phrase (based on Google N-Gram Web 1T).
      * @param text Text to calculate language model probability for.
      * @return double value equal to the log probability of the phrase according to the ngram model.

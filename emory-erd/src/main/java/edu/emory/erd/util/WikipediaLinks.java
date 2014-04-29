@@ -6,10 +6,7 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.collections4.map.MultiKeyMap;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 
@@ -39,7 +36,9 @@ public class WikipediaLinks implements Iterable<WikipediaLinks.Link> {
 
     private static WikipediaLinks self = null;
     private List<Link> links;
-    private MultiKeyMap<String, List<Integer>> fromToLinks;  // A list of links from key1 to key2
+    private HashMap<String, HashMap<String, List<Link>>> inLinks = new HashMap<String, HashMap<String, List<Link>>>();
+    private HashMap<String, HashMap<String, List<Link>>> outLinks = new HashMap<String, HashMap<String, List<Link>>>();
+    private HashMap<String, String> mid2Wiki = new HashMap<String, String>();
 
     /**
      * Creates an instance of WikipediaLinks
@@ -77,7 +76,6 @@ public class WikipediaLinks implements Iterable<WikipediaLinks.Link> {
      */
     private WikipediaLinks(InputStream wikipediaLinksStream) throws IOException {
         links = new ArrayList<Link>();
-        fromToLinks = MultiKeyMap.multiKeyMap(new HashedMap<MultiKey<? extends String>, List<Integer>>());
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(wikipediaLinksStream));
         String line;
@@ -97,11 +95,23 @@ public class WikipediaLinks implements Iterable<WikipediaLinks.Link> {
      */
     private void addLink(String from, String to, String phrase) {
         int index = links.size();
-        links.add(new Link(from, to, phrase));
-        if (!fromToLinks.containsKey(from, to)) {
-            fromToLinks.put(from, to, new ArrayList<Integer>());
+        Link newLink = new Link(from, to, phrase);
+        links.add(newLink);
+        if (!outLinks.containsKey(from)) {
+            outLinks.put(from, new HashMap<String, List<Link>>());
         }
-        fromToLinks.get(from, to).add(index);
+        if (!outLinks.get(from).containsKey(to)) {
+            outLinks.get(from).put(to, new ArrayList<Link>());
+        }
+        outLinks.get(from).get(to).add(newLink);
+
+        if (!inLinks.containsKey(to)) {
+            inLinks.put(to, new HashMap<String, List<Link>>());
+        }
+        if (!inLinks.get(to).containsKey(from)) {
+            inLinks.get(to).put(from, new ArrayList<Link>());
+        }
+        inLinks.get(to).get(from).add(newLink);
     }
 
     /**
@@ -111,5 +121,64 @@ public class WikipediaLinks implements Iterable<WikipediaLinks.Link> {
     @Override
     public Iterator<Link> iterator() {
         return links.iterator();
+    }
+
+    /**
+     * Add a mid, wikipedia title pair.
+     * @param mid Freebase entity mid.
+     * @param wiki Entity wikipedia title.
+     */
+    public void addMid2Wiki(String mid, String wiki) {
+        mid2Wiki.put(mid, normalizeTitle(wiki));
+    }
+
+    /**
+     * Returns wikipedia title by entity mid. null is returned if no mapping found.
+     * @param mid Entity mid.
+     * @return Wikipedia page title.
+     */
+    public String getWikiByMid(String mid) {
+        if (!mid2Wiki.containsKey(mid)) {
+            return null;
+        }
+        return mid2Wiki.get(mid);
+    }
+
+    /**
+     * Returns the number of in-links to a particular Wikipedia entity.
+     * @param name Name of the entity.
+     * @return The number of in-links.
+     */
+    public long getInlinksCount(String name) {
+        if (!inLinks.containsKey(name)) return 0L;
+        return inLinks.get(name).size();
+    }
+
+    /**
+     * Returns the number of Wikipedia pages that link to both name1 and name2. This method searches through all
+     * in links, so it can be slow.
+     * @param name1 The name of the first entity.
+     * @param name2 The name of the second entity.
+     * @return The number of such pages that link to both entities given.
+     */
+    public long getCommonInLinksCount(String name1, String name2) {
+        if (!inLinks.containsKey(name1) || !inLinks.containsKey(name2)) {
+            return 0L;
+        }
+        long res = 0L;
+        // TODO: Should we precompute this? Or at lease memorize?
+        for (String page : inLinks.get(name1).keySet()) {
+            if (inLinks.get(name2).containsKey(page)) {
+                ++res;
+            }
+        }
+        // Also add links from name1 page to name2 and vice versa.
+        if (inLinks.get(name1).containsKey(name2)) {
+            res += inLinks.get(name1).get(name2).size();
+        }
+        if (inLinks.get(name2).containsKey(name1)) {
+            res += inLinks.get(name2).get(name1).size();
+        }
+        return res;
     }
 }

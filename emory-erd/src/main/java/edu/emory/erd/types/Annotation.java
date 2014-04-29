@@ -16,9 +16,6 @@ final public class Annotation implements Comparable<Annotation> {
     private final double score;
 
     public Annotation(Text docText, Span span, EntityInfo info, double score) throws IllegalArgumentException {
-        if (score < 0 || score > 1)
-            throw new IllegalArgumentException("Annotation confidence score should be from 0 to 1.");
-
         sourceText = docText;
         this.span = span;
         entityInfo = info;
@@ -69,5 +66,10 @@ final public class Annotation implements Comparable<Annotation> {
     @Override
     public int compareTo(Annotation annotation) {
         return span.compareTo(annotation.span);
+    }
+
+    @Override
+    public String toString() {
+        return this.entityInfo + "\t" + this.getMentionText() + "\t" + this.getScore();
     }
 }
